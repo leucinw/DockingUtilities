@@ -48,7 +48,7 @@ def subone(mol):
     for conf in confs:
       if "ligand_data_file" in conf:
         d = conf.split()
-        f.write(f"{ligand_data_file} {mol} {npose}\n")
+        f.write(f"ligand_data_file {mol} {npose}\n")
       else:
         f.write(conf)
   if not os.path.isfile("gold.log"):
