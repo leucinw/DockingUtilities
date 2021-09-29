@@ -38,7 +38,7 @@ def splitmol(mol,nfrag):
 
 def subone(mol):
   fname, _ = os.path.splitext(mol)
-  dirname = os.path.join(rootdir, fname)
+  dirname = os.path.join(homedir, fname)
   if not os.path.isdir(dirname):
     os.mkdir(dirname)
   os.chdir(dirname)
@@ -48,10 +48,10 @@ def subone(mol):
     for conf in confs:
       if "ligand_data_file" in conf:
         d = conf.split()
-        f.write(f"{d[0]} {mol} {d[2]}\n")
+        f.write(f"{ligand_data_file} {mol} {npose}\n")
       else:
         f.write(conf)
-  if not os.path.isfile("bestranking.lst"):
+  if not os.path.isfile("gold.log"):
     subprocess.run(goldcmd, shell=True)
   return
 
@@ -61,23 +61,7 @@ def submultiple(mols):
     results = [executor.submit(subone, mol) for mol in mols]
     for f in concurrent.futures.as_completed(results):
       jobs.append(f.result())
-  records = []
-  scores = []
-  for mol in mols:
-    fname, _ = os.path.splitext(mol)
-    goldfinishfile = os.path.join(fname, "bestranking.lst")
-    if os.path.isfile(goldfinishfile):
-      ds = open(goldfinishfile).readlines()
-      for d in ds:
-        if "mol2" in d:
-          records.append(d)
-          scores.append(float(d.split()[0]))
-  records_s = [x for _, x in sorted(zip(scores, records))]
-  with open("bestranking.lst", "w") as f:
-    f.write("#     Score     S(PLP)   S(hbond)     S(cho)   S(metal)  DE(clash)   DE(tors)     intcor     time                               File name                Ligand name\n")
-    for i in range(len(records_s)-1, -1, -1):
-      f.write(records_s[i])
-  return jobs 
+  return 
 
 def main():
   now = datetime.now().strftime("%b %d %Y %H:%M:%S")
@@ -86,21 +70,24 @@ def main():
   parser.add_argument('-ligands', dest = 'ligands',  nargs='+', help = "mol2 files", required=True)  
   parser.add_argument('-protein', dest = 'protein', help = "pdb file", required=True)  
   parser.add_argument('-nfrag', dest = 'nfrag', help = "number of fragments", type=int, default=100)  
+  parser.add_argument('-npose', dest = 'npose', help = "number of poses", type=int, default=5)  
   args = vars(parser.parse_args())
-  global ligands, protein, nfrag 
+  global ligands, protein, nfrag, npose
   ligands = args["ligands"]
   protein = args["protein"]
   nfrag = args["nfrag"]
+  npose = args["npose"]
 
-  global rootdir, confs
-  rootdir = os.getcwd()
+  global homedir, confs
+  homedir = os.getcwd()
   
+  rootdir = os.path.join(os.path.split(__file__)[0])
   #! prepare your gold.conf file carefully
-  conffile = os.path.join(rootdir, "gold.conf")
+  conffile = os.path.join(homedir, "gold.conf")
   if os.path.isfile(conffile):
     confs = open(conffile).readlines()
   else:
-    sys.exit("Error: gold.conf is required to run GOLD")
+    sys.exit(f"Error: gold.conf is required to run GOLD\nYou can copy here: {rootdir}/gold.conf and ADAPT for your purpose!")
   
   global goldcmd
   #! adapt this command for your GOLD

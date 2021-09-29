@@ -1,0 +1,2 @@
+# run GOLD on renlab clusters
+/opt/CCDC/CCDC2020/Discovery_2020/bin/gold_auto gold.conf 
