@@ -92,7 +92,7 @@ def main():
     os.system("cp %s ."%os.path.join(rootdir, "gold.sub"))
   pro_pdb = args["protein"]
   lig_mol = args["ligand"]
-  npolse = args["npose"]
+  npose = args["npose"]
   currdir = os.getcwd()
   gengrids()
   return
