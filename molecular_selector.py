@@ -71,7 +71,7 @@ def write_selected():
     for xx in concurrent.futures.as_completed(results):
       jobs.append(xx.result())
 
-  selectedmol = f"seleted_{str(score)}.mol2"
+  selectedmol = f"selected_{str(score)}.mol2"
   catcmd = f"cat *.mol2.sel > {selectedmol}"
   os.system(catcmd)
   os.system("rm -rf *.mol2.sel")
