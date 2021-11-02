@@ -65,13 +65,34 @@ def bestgrid():
       os.system(grepstr)
   return
 
+def topscore():
+  currdir = os.getcwd().split("/")[-1]
+  if not os.path.isfile("bestranking.lst"):
+    sys.exit("bestranking.lst does not exist")
+  i = 0
+  topmols = []
+  with open("bestranking.lst", 'r') as f:
+    while True:
+      line = f.readline()
+      if "mol2" in line:
+        topmols.append(line.split()[-2].split("./")[-1][:-1])
+        i += 1
+      if i == ntop:break
+  os.system(f"mkdir -p {currdir}_top{ntop}")
+  os.system(f"cp bestranking.lst ./{currdir}_top{ntop}")
+  for mol in topmols:
+    os.system(f"cp */{mol} ./{currdir}_top{ntop}")
+  return
+
 def main():
   parser = argparse.ArgumentParser()
-  parser.add_argument('choice', type=str.lower, choices=['bestgrid', 'bestligand'])
-  args = parser.parse_args()
-  actions = {'bestgrid':bestgrid, 'bestligand':bestligand}
-  print(actions[args.choice])
-  actions[args.choice]()
+  parser.add_argument('choice', type=str.lower, choices=['bestgrid', 'bestligand', 'topscore'])
+  parser.add_argument('-ntop', dest = 'ntop', type=int, default=10)
+  args = vars(parser.parse_args())
+  global ntop
+  ntop = args['ntop']
+  actions = {'bestgrid':bestgrid, 'bestligand':bestligand, 'topscore':topscore}
+  actions[args["choice"]]()
   return
 
 if __name__ == "__main__":
