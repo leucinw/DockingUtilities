@@ -21,9 +21,6 @@ def splitmol(mol,nfrag):
       indices.append(i)
   nlines = len(lines)
   indices.append(nlines-1)
-  
-  if len(indices) <= 5000:
-    nfrag = 10
   nmolecule = int(len(indices)/nfrag) + 1
   for i in range(nfrag):
     istart = indices[i*nmolecule]
@@ -49,6 +46,9 @@ def subone(mol):
       if "ligand_data_file" in conf:
         d = conf.split()
         f.write(f"ligand_data_file {mol} {npose}\n")
+      elif "protein_datafile" in conf:
+        d = conf.split()
+        f.write(f"protein_datafile = {protein}\n")
       else:
         f.write(conf)
   if not os.path.isfile("gold.log"):
